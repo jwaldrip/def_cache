@@ -7,7 +7,7 @@ module FunkyCache::ClassMethods
 
   def setup_for_caching!
     # Copy the superclass handler
-    base_handler   = superclass.instance_variable_get(:@cache_handler) || CacheHandlerBase
+    base_handler   = superclass.instance_variable_get(:@cache_handler) || FunkyCache::CacheHandlerBase
     @cache_handler = const_set :CacheHandler, Class.new(base_handler)
   end
 
@@ -21,8 +21,8 @@ module FunkyCache::ClassMethods
     cache_handler.define_cache_method method, options
   end
 
-  def cache_with(klass)
-    cache_handler.cache_class = klass
+  def cache_with(sym)
+    cache_handler.cache_store = sym
   end
 
   def cache_keys(*keys)

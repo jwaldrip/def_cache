@@ -23,6 +23,9 @@ class Class
   def inherited_attribute(*attrs)
     attrs.each do |attr|
       __inherited_attributes__ << attr
+      define_inherited_attribute_class_setter(attr)
+      define_inherited_attribute_class_getter(attr)
+      define_inherited_attribute_instance_getter(attr)
     end
   end
 

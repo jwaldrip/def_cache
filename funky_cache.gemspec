@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = FunkyCache::VERSION
   spec.authors       = ["Jason Waldrip"]
   spec.email         = ["jason@waldrip.net"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = 'An agnostic ActiveSupport::Cache helper to enable easy caching of methods inside your classes.'
+  spec.summary       = 'An agnostic ActiveSupport::Cache helper to enable easy caching of methods inside your classes.'
+  spec.homepage      = "https://github.com/jwaldrip/funky_cache"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

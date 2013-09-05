@@ -1,18 +1,12 @@
 class FunkyCache::CacheHandlerBase
 
-  inherited_attribute :cache_klass, :_cache_keys, :logger, :_cached_methods_with_options
-  self._cached_methods_with_options = {}
-  self._cache_keys = []
-  delegate :options_for_method, :cache_klass_for_method, to: :class
-  self.cache_klass = defined?(Rails) ? Rails.cache : ActiveSupport::Cache.lookup_store :mem_store
-  self.logger = defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
-
-  attr_reader :instance
+  inherited_attribute :cache_store, :_cache_keys, :logger, :_cached_methods_with_options
 
   # Class methods
 
   class << self
 
+    delegate :lookup_store, to: ActiveSupport::Cache
     alias base parent
 
     def cached_methods_with_options
@@ -22,6 +16,11 @@ class FunkyCache::CacheHandlerBase
 
     def cached_methods
       cached_methods_with_options.keys
+    end
+
+    def cache_store=(store, options={})
+      store        = lookup_store(store, options) if store.is_a? Symbol
+      @cache_store = store
     end
 
     def define_cache_method(method, options)
@@ -41,8 +40,8 @@ class FunkyCache::CacheHandlerBase
     end
 
     # The cache class for a given method
-    def cache_klass_for_method(method)
-      options_for_method(method)[:with] || cache_klass
+    def cache_store_for_method(method)
+      options_for_method(method)[:with] || cache_store
     end
 
     private
@@ -53,10 +52,21 @@ class FunkyCache::CacheHandlerBase
       options[:original_method]  = method
       options[:cached_method]    = "#{cached_target}_with_cache#{punctuation}"
       options[:miss_method]      = "#{cached_target}_without_cache#{punctuation}"
+      options[:with]             = lookup_store(store, options) if options[:with].is_a? Symbol
       _cached_methods_with_options.merge! method => options
     end
 
   end
+
+  # Attrs
+  attr_reader :instance
+  self._cached_methods_with_options = {}
+  self._cache_keys                  = []
+  self.cache_store                  = defined?(Rails) ? Rails.cache : :memory_store
+  self.logger                       = defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
+
+  # Delegations
+  delegate :options_for_method, :cache_store_for_method, to: :class
 
   # Instance Methods
 
@@ -72,21 +82,21 @@ class FunkyCache::CacheHandlerBase
   def clear_all_references!
     self.class.cached_methods.each do |method|
       # Cache Class
-      cache_klass = cache_klass_for_method(method)
+      cache_store = cache_store_for_method(method)
 
       # Cache Key
       index_key   = index_key_for_method(method)
 
       # Clear each subkey in the index key
-      return unless (index = cache_klass.read(index_key) || []).present?
+      return unless (index = cache_store.read(index_key) || []).present?
       index.each do |subkey|
         Rails.logger.info "removing cache ref: #{subkey}"
-        cache_klass.delete subkey
+        cache_store.delete subkey
       end
 
       # Clear the index key
       Rails.logger.info "removing cache ref index: #{index_key}"
-      cache_klass.delete index_key
+      cache_store.delete index_key
     end
 
   end
@@ -102,10 +112,10 @@ class FunkyCache::CacheHandlerBase
     add_reference(method, *args)
 
     # Load the cache class
-    cache_klass = cache_klass_for_method(method)
+    cache_store = cache_store_for_method(method)
 
     # Do the cache fetch
-    cache_klass.fetch(method_cache_key method, *args) do
+    cache_store.fetch(method_cache_key method, *args) do
       instance.send(options[:miss_method])
     end
   end
@@ -121,18 +131,18 @@ class FunkyCache::CacheHandlerBase
 
   def add_reference(method, *args)
     # Cache Class
-    cache_klass = cache_klass_for_method(method)
+    cache_store = cache_store_for_method(method)
 
     # Cache Keys
     index_key   = index_key_for_method(method)
     call_key    = self.method_cache_key(method, *args)
 
     # Update the index
-    index       = cache_klass.read(index_key) || []
+    index       = cache_store.read(index_key) || []
     unless index.include? call_key
       Rails.logger.info "adding cache ref: #{call_key}"
       index << call_key
-      cache_klass.write index_key, index
+      cache_store.write index_key, index
     end
   end
 
