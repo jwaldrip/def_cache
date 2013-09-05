@@ -21,8 +21,8 @@ module FunkyCache::ClassMethods
     cache_handler.define_cache_method method, options
   end
 
-  def cache_with(sym)
-    cache_handler.cache_store = sym
+  def cache_with(sym, options={})
+    cache_handler.cache_store = sym, options
   end
 
   def cache_keys(*keys)
