@@ -1,4 +1,4 @@
-require "funky_cache/version"
+require "def_cache/version"
 require "core_ext/class"
 require "active_support/all"
 
