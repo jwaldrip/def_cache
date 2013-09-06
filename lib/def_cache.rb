@@ -2,7 +2,7 @@ require "funky_cache/version"
 require "core_ext/class"
 require "active_support/all"
 
-module FunkyCache
+module DefCache
   extend ActiveSupport::Concern
   extend ActiveSupport::Autoload
 

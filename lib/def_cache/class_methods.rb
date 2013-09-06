@@ -1,4 +1,4 @@
-module FunkyCache::ClassMethods
+module DefCache::ClassMethods
 
   def inherited(subclass)
     subclass.setup_for_caching!
@@ -7,7 +7,7 @@ module FunkyCache::ClassMethods
 
   def setup_for_caching!
     # Copy the superclass handler
-    base_handler   = superclass.instance_variable_get(:@cache_handler) || FunkyCache::CacheHandlerBase
+    base_handler   = superclass.instance_variable_get(:@cache_handler) || DefCache::CacheHandlerBase
     @cache_handler = const_set :CacheHandler, Class.new(base_handler)
   end
 

@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'funky_cache/version'
+require 'def_cache/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "funky_cache"
-  spec.version       = FunkyCache::VERSION
+  spec.name          = "def_cache"
+  spec.version       = DefCache::VERSION
   spec.authors       = ["Jason Waldrip"]
   spec.email         = ["jason@waldrip.net"]
   spec.description   = 'An agnostic ActiveSupport::Cache helper to enable easy caching of methods inside your classes.'

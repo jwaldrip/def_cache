@@ -1,4 +1,4 @@
-class FunkyCache::CacheHandlerBase
+class DefCache::CacheHandlerBase
 
   inherited_attribute :cache_store, :_cache_keys, :logger, :_cached_methods_with_options
 
