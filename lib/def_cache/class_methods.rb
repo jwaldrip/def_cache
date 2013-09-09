@@ -50,4 +50,21 @@ module DefCache::ClassMethods
     RUBY
   end
 
+  # Relink the original method if it is redefined
+  def method_added(method)
+    if !cached_methods_just_added.delete(method) && method_defined?("#{method}_with_cache")
+      alias_method "#{method}_without_cache", method
+      cached_methods_just_added << method
+      alias_method method, "#{method}_with_cache"
+    end
+    super
+  rescue NoMethodError
+    nil
+  end
+
+  # A collection for just added methods
+  def cached_methods_just_added
+    @cached_methods_added ||= []
+  end
+
 end
