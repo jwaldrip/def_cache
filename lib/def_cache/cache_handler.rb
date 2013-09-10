@@ -1,23 +1,26 @@
 class DefCache::CacheHandler
 
   delegate :lookup_store, to: ActiveSupport::Cache
-  attr_reader :method, :instance, :keys, :cache_store, :cache_options
+  attr_reader :method_name, :instance, :keys, :cache_store, :cache_options, :miss_method
 
   def initialize(method, instance, options={})
     cached_target, punctuation = method.to_s.sub(/([?!=])$/, ''), $1
     @cache_options             = options.except(:with, :keys)
     @logger                    = options[:logger]
     @cache_store               = fetch_store options[:with]
-    @method                    = instance.method(method)
-    @cache_method              = "#{cached_target}_with_cache#{punctuation}"
     @miss_method               = "#{cached_target}_without_cache#{punctuation}"
+    @method_name               = method
     @keys                      = Array.wrap(options[:keys]) || []
     @instance                  = instance
   end
 
   def cache_key(*values)
     keys.map { |key| instance.send(key) || '*' }
-    [instance_cache_key, method.name, keys, values].flatten.select(&:present?).join('/')
+    [instance_cache_key, method_name, keys, values].flatten.select(&:present?).join('/')
+  end
+
+  def method
+    instance.method(miss_method)
   end
 
   def instance_cache_key
