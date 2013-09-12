@@ -26,7 +26,8 @@ class DefCache::CacheHandler
   def instance_cache_key
     instance.cache_key
   rescue NoMethodError
-    instance.is_a?(Module) ? name : instance.class.name
+    klass = (instance.is_a?(Module) ? self : instance.class)
+    klass.name || klass.object_id
   end
 
   def logger
