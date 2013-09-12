@@ -15,11 +15,11 @@ class DefCache::CacheHandler
   end
 
   def cache_key(*values)
-    keys.map { |key| instance.send(key) || '*' }
-    [instance_cache_key, method_name, keys, values].flatten.select(&:present?).join('/')
+    key_values = keys.map { |key| instance.send(key) || '*' }
+    [instance_cache_key, *key_values, method_name, *values].select(&:present?).join('/')
   end
 
-  def method
+  def instance_method
     instance.method(miss_method)
   end
 
@@ -34,7 +34,7 @@ class DefCache::CacheHandler
   end
 
   def method_cache_key(*args, &block)
-    params = method.parameters.each_with_index do |(req, param), n|
+    params = instance_method.parameters.each_with_index do |(req, param), n|
       send "#{req}_parameter_key", param, args[n], &block
     end.compact.join(',')
     cache_key *params

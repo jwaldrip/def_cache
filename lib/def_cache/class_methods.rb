@@ -23,17 +23,18 @@ module DefCache::ClassMethods
 
   # Define cache with method
   def define_cache_with_method(method)
+    target, punctuation = method.to_s.sub(/([?!=])$/, ''), $1
     class_eval <<-RUBY
-      def #{method}_with_cache(*args, &block)
+      def #{target}_with_cache#{punctuation}(*args, &block)
         handler = cache_handler_for_#{method}
         handler.cache_store.fetch(handler.cache_key, handler.cache_options) do
           handler.add_reference(handler.cache_key)
-          #{method}_without_cache *args, &block
+          #{target}_without_cache#{punctuation} *args, &block
         end
       rescue MethodSource::SourceNotFoundError => e
         warn e
-        #{method}_without_cache *args, &block
-      end unless method_defined? :#{method}_with_cache
+        #{target}_without_cache#{punctuation} *args, &block
+      end unless method_defined? :#{target}_with_cache#{punctuation}
     RUBY
   end
 
