@@ -119,22 +119,4 @@ describe DefCache::ClassMethods do
     end
   end
 
-  describe '.method_added' do
-    context 'if the with cache method is defined' do
-      before(:each) { klass.send(:define_method, :foo_with_cache) { 'value' } }
-      it 'should call define_cache_method' do
-        expect(klass).to receive(:define_cache_method).with(:foo)
-        klass.send(:method_added, :foo)
-      end
-
-      context 'if the method has just been added' do
-        it 'should call define_cache_method' do
-          klass.send(:cached_methods_just_added) << :foo
-          expect(klass).to_not receive(:define_cache_method).with(:foo)
-          klass.send(:method_added, :foo)
-        end
-      end
-    end
-  end
-
 end
